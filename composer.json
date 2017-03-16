@@ -1,0 +1,22 @@
+{
+  "name": "makasim/yadm-bundle",
+  "type": "symfony-bundle",
+  "license": "MIT",
+  "require": {
+    "php": ">=7.0",
+    "makasim/yadm": "^0.3",
+    "doctrine/common": "^2.7",
+    "doctrine/data-fixtures": "^1.2"
+  },
+  "autoload": {
+    "psr-4": { "Makasim\\Yadm\\Bundle\\": "" },
+    "exclude-from-classmap": [
+      "/Tests/"
+    ]
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "0.2.x-dev"
+    }
+  }
+}
