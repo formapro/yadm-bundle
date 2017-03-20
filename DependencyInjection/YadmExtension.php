@@ -38,8 +38,12 @@ class YadmExtension extends Extension
             if (false == $hydratorId = $modelConfig['hydrator']) {
                 $hydratorId = sprintf('yadm.%s.hydrator', $name);
 
-                $container->register($hydratorId, Hydrator::class)->addArgument($modelConfig['class']);
+                $hydratorClass = $modelConfig['hydrator_class'];
+
+                $container->register($hydratorId, $hydratorClass)->addArgument($modelConfig['class']);
             }
+
+
 
             $container->register(sprintf('yadm.%s.storage', $name), Storage::class)
                 ->addArgument(new Reference(sprintf('yadm.%s.collection', $name)))
