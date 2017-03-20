@@ -91,6 +91,8 @@ class LoadDataFixturesYadmCommand extends Command implements ContainerAwareInter
                 realpath($dumpFile)
             ));
         }
+
+        $output->writeln('Done');
     }
 
     /**
