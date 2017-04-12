@@ -40,7 +40,7 @@ class ReferenceRepository extends \Doctrine\Common\DataFixtures\ReferenceReposit
     public function setReference($name, $reference)
     {
         $this->references[$name] = $reference;
-        $this->identities[$name] = [get_class($reference), get_object_id($reference)];
+        $this->identities[$name] = [get_class($reference), (string) get_object_id($reference)];
     }
 
     /**
@@ -106,7 +106,7 @@ class ReferenceRepository extends \Doctrine\Common\DataFixtures\ReferenceReposit
     {
         $identities = [];
         foreach ($this->references as $name => $reference) {
-            $identities[$name] = [get_class($reference), get_object_id($reference)];
+            $identities[$name] = [get_class($reference), (string) get_object_id($reference)];
         }
 
         return $identities;

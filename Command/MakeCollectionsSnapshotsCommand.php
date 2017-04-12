@@ -37,18 +37,21 @@ class MakeCollectionsSnapshotsCommand extends Command implements ContainerAwareI
         $logger->debug('Make snapshots of mongodb collections');
 
         $snapshotter = new Snapshotter($this->getClient());
+        $processedCollections = [];
         foreach ($this->getRegistry()->getStorages() as $name => $storage) {
-            // same storage could be present in registry several times. It is always registered with class as name
-            // and could have several other aliases.
-            if (false == class_exists($name)) {
-                continue;
-            }
-
             /** @var Storage $storage */
 
             $collection = $storage->getCollection();
 
+            $collection->getCollectionName();
+
+            if (isset($processedCollections[$collection->getCollectionName()])) {
+                continue;
+            }
+
             $snapshotter->make($collection, $logger);
+
+            $processedCollections[$collection->getCollectionName()] = true;
         }
 
         $logger->debug('Done');

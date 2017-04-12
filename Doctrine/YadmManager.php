@@ -6,6 +6,8 @@ use function Makasim\Values\get_values;
 use function Makasim\Values\set_values;
 use function Makasim\Yadm\get_object_id;
 use Makasim\Yadm\Registry;
+use function Makasim\Yadm\set_object_id;
+use MongoDB\BSON\ObjectID;
 
 class YadmManager implements ObjectManager
 {
@@ -80,9 +82,7 @@ class YadmManager implements ObjectManager
      */
     public function refresh($object)
     {
-        $id = get_object_id($object);
-
-        $refreshedObject = $this->registry->getStorage(get_class($object))->findOne(['_id' => $id]);
+        $refreshedObject = $this->registry->getStorage(get_class($object))->findOne(['_id' => get_object_id($object)]);
         $refreshedValues = get_values($refreshedObject);
 
         set_values($object, $refreshedValues);
@@ -99,7 +99,7 @@ class YadmManager implements ObjectManager
         foreach ($persisted as $object) {
             $storage = $this->registry->getStorage(get_class($object));
 
-            if ($id = get_object_id($object)) {
+            if (get_object_id($object, false)) {
                 $storage->update($object);
             } else {
                 $storage->insert($object);

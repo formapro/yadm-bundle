@@ -12,12 +12,19 @@ trait YadmExtension
     {
         $snapshotter = new Snapshotter($this->getMongodbClient());
 
+        $processedCollections = [];
         foreach ($this->getYadmRegistry()->getStorages() as $name => $storage) {
-            if (false ==class_exists($name)) {
+            $collection = $storage->getCollection();
+
+            $collection->getCollectionName();
+
+            if (isset($processedCollections[$collection->getCollectionName()])) {
                 continue;
             }
 
-            $snapshotter->restore($storage->getCollection());
+            $snapshotter->restore($collection);
+
+            $processedCollections[$collection->getCollectionName()] = true;
         }
     }
 
