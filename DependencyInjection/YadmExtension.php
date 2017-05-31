@@ -45,7 +45,7 @@ class YadmExtension extends Extension
 
 
 
-            $container->register(sprintf('yadm.%s.storage', $name), Storage::class)
+            $container->register(sprintf('yadm.%s.storage', $name), $modelConfig['storage_class'])
                 ->addArgument(new Reference(sprintf('yadm.%s.collection', $name)))
                 ->addArgument(new Reference($hydratorId))
                 ->addArgument(new Reference('yadm.changes_collector'))
