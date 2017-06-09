@@ -3,6 +3,7 @@ namespace Makasim\Yadm\Bundle\DependencyInjection;
 
 use Makasim\Yadm\ChangesCollector;
 use Makasim\Yadm\Hydrator;
+use Makasim\Yadm\PessimisticLock;
 use Makasim\Yadm\Registry;
 use Makasim\Yadm\Storage;
 use MongoDB\Client;
@@ -58,7 +59,7 @@ class YadmExtension extends Extension
                     ->addArgument($modelConfig['collection'].'_lock')
                 ;
 
-                $container->register(sprintf('yadm.%s.pessimistic_lock', $name))
+                $container->register(sprintf('yadm.%s.pessimistic_lock', $name), PessimisticLock::class)
                     ->addArgument(new Reference(sprintf('yadm.%s.pessimistic_lock_collection', $name)))
                 ;
 
