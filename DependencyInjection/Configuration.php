@@ -17,7 +17,7 @@ class Configuration implements ConfigurationInterface
         $rootNode = $tb->root('yadm');
 
         $rootNode->children()
-            ->scalarNode('mongo_uri')->end()
+            ->scalarNode('mongo_uri')->cannotBeEmpty()->isRequired()->end()
             ->arrayNode('models')
                 ->prototype('array')
                     ->addDefaultsIfNotSet()
@@ -25,7 +25,7 @@ class Configuration implements ConfigurationInterface
                         ->scalarNode('class')->isRequired()->cannotBeEmpty()->end()
                         ->scalarNode('storage_class')->defaultValue(Storage::class)->isRequired()->cannotBeEmpty()->end()
                         ->scalarNode('collection')->isRequired()->cannotBeEmpty()->end()
-                        ->scalarNode('database')->isRequired()->cannotBeEmpty()->end()
+                        ->scalarNode('database')->end()
                         ->scalarNode('hydrator')->defaultValue(false)->end()
                         ->scalarNode('hydrator_class')->defaultValue(Hydrator::class)->cannotBeEmpty()->end()
                         ->booleanNode('pessimistic_lock')->defaultFalse()->end()
