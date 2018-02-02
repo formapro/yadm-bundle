@@ -31,17 +31,15 @@ class AppKernel extends Kernel
 
 ```yaml
 yadm:
-    mongo_uri: 'mongodb://mongo:27017/'
+    mongo_uri: 'mongodb://mongo:27017/db_name'
     models:
       category:
           class: 'Acme\Model\Category'
           collection: 'category'
-          database: 'acme'
       product:
           class: 'Acme\Model\Product'
           collection: 'product'
           hydrator: 'app.product.hydrator'
-          database: 'acme'
 ```
 
 ## Usage
@@ -55,7 +53,6 @@ $registry = $container->get('yadm');
 
 $productStorage = $registry->getStorage('Acme\Model\Category');
 ```
-
 
 ## Licence
 

@@ -2,10 +2,9 @@
 namespace Makasim\Yadm\Bundle\DependencyInjection;
 
 use Makasim\Yadm\ChangesCollector;
-use Makasim\Yadm\Hydrator;
+use Makasim\Yadm\CollectionFactory;
 use Makasim\Yadm\PessimisticLock;
 use Makasim\Yadm\Registry;
-use Makasim\Yadm\Storage;
 use MongoDB\Client;
 use MongoDB\Collection;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -25,15 +24,20 @@ class YadmExtension extends Extension
             ->addArgument($config['mongo_uri'])
         ;
 
+        $container->register('yadm.collection_factory', CollectionFactory::class)
+            ->addArgument(new Reference('yadm.client'))
+            ->addArgument($config['mongo_uri'])
+        ;
+
         $container->register('yadm.changes_collector', ChangesCollector::class);
 
         $storages = [];
         $repositories = [];
         foreach ($config['models'] as $name => $modelConfig) {
             $container->register(sprintf('yadm.%s.collection', $name), Collection::class)
-                ->setFactory([new Reference('yadm.client'), 'selectCollection'])
-                ->addArgument($modelConfig['database'])
+                ->setFactory([new Reference('yadm.collection_factory'), 'create'])
                 ->addArgument($modelConfig['collection'])
+                ->addArgument($modelConfig['database'])
             ;
 
             if (false == $hydratorId = $modelConfig['hydrator']) {
@@ -54,9 +58,9 @@ class YadmExtension extends Extension
 
             if ($modelConfig['pessimistic_lock']) {
                 $container->register(sprintf('yadm.%s.pessimistic_lock_collection', $name), Collection::class)
-                    ->setFactory([new Reference('yadm.client'), 'selectCollection'])
-                    ->addArgument($modelConfig['database'])
+                    ->setFactory([new Reference('yadm.collection_factory'), 'create'])
                     ->addArgument($modelConfig['collection'].'_lock')
+                    ->addArgument($modelConfig['database'])
                 ;
 
                 $container->register(sprintf('yadm.%s.pessimistic_lock', $name), PessimisticLock::class)
