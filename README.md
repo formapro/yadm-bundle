@@ -5,7 +5,7 @@
 Install library
 
 ```bash
-$ composer require makasim/yadm-bundle
+$ composer require makasim/yadm-bundle "mikemccabe/json-patch-php:dev-master as 0.1.1"
 ```
 
 Register the bundle
