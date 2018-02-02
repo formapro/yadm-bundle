@@ -4,7 +4,7 @@
   "license": "MIT",
   "require": {
     "php": ">=7.0",
-    "makasim/yadm": "^0.3.9",
+    "makasim/yadm": "^0.3.10",
     "doctrine/common": "^2.7",
     "doctrine/data-fixtures": "^1.2"
   },
