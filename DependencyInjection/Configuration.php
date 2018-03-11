@@ -23,7 +23,7 @@ class Configuration implements ConfigurationInterface
                     ->addDefaultsIfNotSet()
                     ->children()
                         ->scalarNode('class')->isRequired()->cannotBeEmpty()->end()
-                        ->scalarNode('storage_class')->defaultValue(Storage::class)->isRequired()->cannotBeEmpty()->end()
+                        ->scalarNode('storage_class')->defaultValue(Storage::class)->cannotBeEmpty()->end()
                         ->scalarNode('collection')->isRequired()->cannotBeEmpty()->end()
                         ->scalarNode('database')->defaultValue(null)->end()
                         ->scalarNode('hydrator')->defaultValue(false)->end()

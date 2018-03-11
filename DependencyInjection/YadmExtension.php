@@ -84,5 +84,9 @@ class YadmExtension extends Extension
             ->addArgument($storages)
             ->addArgument($repositories)
         ;
+
+        $container->addAliases([
+            Registry::class => 'yadm'
+        ]);
     }
 }
