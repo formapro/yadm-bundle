@@ -56,6 +56,12 @@ class YadmExtension extends Extension
                 ->addArgument(new Reference('yadm.changes_collector'))
             ;
 
+            if ($modelConfig['storage_autowire']) {
+                $container->setAlias($modelConfig['storage_class'], sprintf('yadm.%s.storage', $name))
+                    ->setPublic(true)
+                ;
+            }
+
             if ($modelConfig['pessimistic_lock']) {
                 $container->register(sprintf('yadm.%s.pessimistic_lock_collection', $name), Collection::class)
                     ->setFactory([new Reference('yadm.collection_factory'), 'create'])
