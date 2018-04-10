@@ -8,7 +8,7 @@
   },
   "suggest": {
     "doctrine/data-fixtures": "^1.2  If you want to use fixrue load command"
-  }
+  },
   "autoload": {
     "psr-4": { "Makasim\\Yadm\\Bundle\\": "" },
     "exclude-from-classmap": [
