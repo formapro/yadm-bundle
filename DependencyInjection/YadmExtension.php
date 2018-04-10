@@ -3,8 +3,11 @@ namespace Makasim\Yadm\Bundle\DependencyInjection;
 
 use Makasim\Yadm\ChangesCollector;
 use Makasim\Yadm\CollectionFactory;
+use Makasim\Yadm\ConvertValues;
 use Makasim\Yadm\PessimisticLock;
 use Makasim\Yadm\Registry;
+use Makasim\Yadm\Type\UTCDatetimeType;
+use Makasim\Yadm\Type\UuidType;
 use MongoDB\Client;
 use MongoDB\Collection;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -24,6 +27,9 @@ class YadmExtension extends Extension
             ->addArgument($config['mongo_uri'])
         ;
 
+        $container->register('yadm.uuid_type', UuidType::class);
+        $container->register('yadm.utc_datetime', UTCDatetimeType::class);
+
         $container->register('yadm.collection_factory', CollectionFactory::class)
             ->addArgument(new Reference('yadm.client'))
             ->addArgument($config['mongo_uri'])
@@ -40,6 +46,25 @@ class YadmExtension extends Extension
                 ->addArgument($modelConfig['database'])
             ;
 
+            $typesServices = [];
+            foreach ($modelConfig['types'] as $key => $type) {
+                switch ($type) {
+                    case 'uuid':
+                        $typesServices[$key] = new Reference('yadm.uuid_type');
+
+                        break;
+                    case 'datetime':
+                        $typesServices[$key] = new Reference('yadm.utc_datetime');
+
+                        break;
+                    default:
+                        $typesServices[$key] = new Reference($type);
+                }
+            }
+            $container->register(sprintf('yadm.%s.convert_values', $name), ConvertValues::class)
+                ->addArgument($typesServices)
+            ;
+
             if (false == $hydratorId = $modelConfig['hydrator']) {
                 $hydratorId = sprintf('yadm.%s.hydrator', $name);
 
@@ -48,12 +73,12 @@ class YadmExtension extends Extension
                 $container->register($hydratorId, $hydratorClass)->addArgument($modelConfig['class']);
             }
 
-
-
             $container->register(sprintf('yadm.%s.storage', $name), $modelConfig['storage_class'])
                 ->addArgument(new Reference(sprintf('yadm.%s.collection', $name)))
                 ->addArgument(new Reference($hydratorId))
                 ->addArgument(new Reference('yadm.changes_collector'))
+                ->addArgument(null)
+                ->addArgument(new Reference(sprintf('yadm.%s.convert_values', $name)))
             ;
 
             if ($modelConfig['storage_autowire']) {
@@ -74,7 +99,7 @@ class YadmExtension extends Extension
                 ;
 
                 $container->getDefinition(sprintf('yadm.%s.storage', $name))
-                    ->addArgument(new Reference(sprintf('yadm.%s.pessimistic_lock', $name)))
+                    ->replaceArgument(4, new Reference(sprintf('yadm.%s.pessimistic_lock', $name)))
                 ;
             }
 
