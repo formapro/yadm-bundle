@@ -4,10 +4,11 @@
   "license": "MIT",
   "require": {
     "php": ">=7.0",
-    "makasim/yadm": "^0.3.10",
-    "doctrine/common": "^2.7",
-    "doctrine/data-fixtures": "^1.2"
+    "makasim/yadm": "^0.4"
   },
+  "suggest": {
+    "doctrine/data-fixtures": "^1.2  If you want to use fixrue load command"
+  }
   "autoload": {
     "psr-4": { "Makasim\\Yadm\\Bundle\\": "" },
     "exclude-from-classmap": [
@@ -16,7 +17,7 @@
   },
   "extra": {
     "branch-alias": {
-      "dev-master": "0.2.x-dev"
+      "dev-master": "0.4.x-dev"
     }
   }
 }
