@@ -9,12 +9,27 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\DependencyInjection\ContainerAwareInterface;
-use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 
-class MakeCollectionsSnapshotsCommand extends Command implements ContainerAwareInterface
+class MakeCollectionsSnapshotsCommand extends Command
 {
-    use ContainerAwareTrait;
+    public static $defaultName = 'yadm:make-collections-snapshots';
+
+    /**
+     * @var Registry
+     */
+    private $yadm;
+
+    /**
+     * @var Client
+     */
+    private $client;
+
+    public function __construct(?string $name = null, Registry $yadm, Client $client)
+    {
+        parent::__construct($name);
+        $this->yadm = $yadm;
+        $this->client = $client;
+    }
 
     /**
      * {@inheritdoc}
@@ -36,9 +51,9 @@ class MakeCollectionsSnapshotsCommand extends Command implements ContainerAwareI
 
         $logger->debug('Make snapshots of mongodb collections');
 
-        $snapshotter = new Snapshotter($this->getClient());
+        $snapshotter = new Snapshotter($this->client);
         $processedCollections = [];
-        foreach ($this->getRegistry()->getStorages() as $name => $storage) {
+        foreach ($this->yadm->getStorages() as $name => $storage) {
             /** @var Storage $storage */
 
             $collection = $storage->getCollection();
@@ -55,21 +70,5 @@ class MakeCollectionsSnapshotsCommand extends Command implements ContainerAwareI
         }
 
         $logger->debug('Done');
-    }
-
-    /**
-     * @return Client|object
-     */
-    private function getClient()
-    {
-        return $this->container->get('yadm.client');
-    }
-
-    /**
-     * @return Registry|object
-     */
-    private function getRegistry()
-    {
-        return $this->container->get('yadm');
     }
 }

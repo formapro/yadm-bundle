@@ -99,7 +99,7 @@ class YadmManager implements ObjectManager
         foreach ($persisted as $object) {
             $storage = $this->registry->getStorage(get_class($object));
 
-            if (get_object_id($object, false)) {
+            if (get_object_id($object, true)) {
                 $storage->update($object);
             } else {
                 $storage->insert($object);

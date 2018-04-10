@@ -1,6 +1,7 @@
 <?php
 namespace Makasim\Yadm\Bundle\Command;
 
+use App\Kernel;
 use Makasim\Yadm\Bundle\Doctrine\Fixture\YadmExecutor;
 use Makasim\Yadm\Bundle\Doctrine\Fixture\YadmPurger;
 use Makasim\Yadm\Bundle\Doctrine\YadmManager;
@@ -11,12 +12,29 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
-use Symfony\Component\DependencyInjection\ContainerAwareInterface;
-use Symfony\Component\DependencyInjection\ContainerAwareTrait;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
-class LoadDataFixturesYadmCommand extends Command implements ContainerAwareInterface
+class LoadDataFixturesYadmCommand extends Command
 {
-    use ContainerAwareTrait;
+    public static $defaultName = 'yadm:fixtures:load';
+    
+    /**
+     * @var Registry
+     */
+    private $yadm;
+
+    /**
+     * @var ContainerInterface 
+     */
+    private $container;
+
+    public function __construct(?string $name = null, Registry $yadm, ContainerInterface $container)
+    {
+        parent::__construct($name);
+        
+        $this->yadm = $yadm;
+        $this->container = $container;
+    }
 
     /**
      * {@inheritdoc}
@@ -37,10 +55,7 @@ class LoadDataFixturesYadmCommand extends Command implements ContainerAwareInter
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        /** @var Registry $registry */
-        $registry = $this->container->get('yadm');
-
-        $manager = new YadmManager($registry);
+        $manager = new YadmManager($this->yadm);
 
         if ($input->isInteractive() && !$input->getOption('append')) {
             if (!$this->askConfirmation($input, $output, '<question>Careful, database will be purged. Do you want to continue y/N ?</question>', false)) {
@@ -52,8 +67,12 @@ class LoadDataFixturesYadmCommand extends Command implements ContainerAwareInter
         if ($dirOrFile) {
             $paths = is_array($dirOrFile) ? $dirOrFile : array($dirOrFile);
         } else {
-            $paths = array();
-            foreach ($this->getApplication()->getKernel()->getBundles() as $bundle) {
+            /** @var Kernel $kernel */
+            $kernel = $this->getApplication()->getKernel();
+
+            $paths = [];
+            $paths[] = $kernel->getProjectDir().'/src/DataFixtures/YADM';
+            foreach ($kernel->getBundles() as $bundle) {
                 $paths[] = $bundle->getPath().'/DataFixtures/YADM';
             }
         }
@@ -73,7 +92,7 @@ class LoadDataFixturesYadmCommand extends Command implements ContainerAwareInter
             );
         }
 
-        $purger = new YadmPurger($registry);
+        $purger = new YadmPurger($this->yadm);
         $executor = new YadmExecutor($manager, $purger);
         $executor->setLogger(function ($message) use ($output) {
             $output->writeln(sprintf('  <comment>></comment> <info>%s</info>', $message));

@@ -1,6 +1,8 @@
 <?php
 namespace Makasim\Yadm\Bundle\DependencyInjection;
 
+use Makasim\Yadm\Bundle\Command\LoadDataFixturesYadmCommand;
+use Makasim\Yadm\Bundle\Command\MakeCollectionsSnapshotsCommand;
 use Makasim\Yadm\ChangesCollector;
 use Makasim\Yadm\CollectionFactory;
 use Makasim\Yadm\ConvertValues;
@@ -99,7 +101,7 @@ class YadmExtension extends Extension
                 ;
 
                 $container->getDefinition(sprintf('yadm.%s.storage', $name))
-                    ->replaceArgument(4, new Reference(sprintf('yadm.%s.pessimistic_lock', $name)))
+                    ->replaceArgument(3, new Reference(sprintf('yadm.%s.pessimistic_lock', $name)))
                 ;
             }
 
@@ -117,7 +119,22 @@ class YadmExtension extends Extension
         ;
 
         $container->addAliases([
-            Registry::class => 'yadm'
+            Registry::class => 'yadm',
+            Client::class => 'yadm.client',
         ]);
+
+        $container->register(LoadDataFixturesYadmCommand::class)
+            ->addArgument(null)
+            ->addArgument(new Reference('yadm'))
+            ->addArgument(new Reference('service_container'))
+            ->addTag('console.command')
+        ;
+
+        $container->register(MakeCollectionsSnapshotsCommand::class)
+            ->addArgument(null)
+            ->addArgument(new Reference('yadm'))
+            ->addArgument(new Reference('yadm.client'))
+            ->addTag('console.command')
+        ;
     }
 }
