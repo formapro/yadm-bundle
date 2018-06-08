@@ -58,6 +58,8 @@ class MakeCollectionsSnapshotsCommand extends Command
 
             $collection = $storage->getCollection();
 
+            $collection->getCollectionName();
+
             if (isset($processedCollections[$collection->getCollectionName()])) {
                 continue;
             }

@@ -31,18 +31,21 @@ class Snapshotter
 
         $collectionName = $collection->getCollectionName();
         $dbName = $collection->getDatabaseName();
-        $snapshotCollectionName = 'snapshot_'.$collectionName;
+        $snapshotDbName = $dbName.'_snapshot';
 
         $logger->debug(sprintf(
             'Copy documents from <info>%s.%s</info> to <info>%s.%s</info>',
             $dbName,
             $collectionName,
-            $dbName,
-            $snapshotCollectionName
+            $snapshotDbName,
+            $collectionName
         ));
 
-        $snapshotCollection = $this->client->selectCollection($dbName, $collectionName);
-        $snapshotCollection->aggregate([['$match' => new \stdClass], ['$out' => $snapshotCollectionName ]]);
+        $snapshotCollection = $this->client->selectCollection($snapshotDbName, $collectionName);
+        $snapshotCollection->drop();
+        foreach ($collection->find() as $document) {
+            $snapshotCollection->insertOne($document);
+        }
     }
 
     /**
@@ -55,17 +58,20 @@ class Snapshotter
 
         $collectionName = $collection->getCollectionName();
         $dbName = $collection->getDatabaseName();
-        $snapshotCollectionName = 'snapshot_'.$collectionName;
+        $snapshotDbName = $dbName.'_snapshot';
 
         $logger->debug(sprintf(
             'Copy documents from <info>%s.%s</info> to <info>%s.%s</info>',
             $dbName,
             $collectionName,
-            $dbName,
-            $snapshotCollectionName
+            $snapshotDbName,
+            $collectionName
         ));
 
-        $snapshotCollection = $this->client->selectCollection($dbName, $snapshotCollectionName);
-        $snapshotCollection->aggregate([['$match' => new \stdClass], ['$out' => $collectionName ]]);
+        $snapshotCollection = $this->client->selectCollection($snapshotDbName, $collectionName);
+        $collection->drop();
+        foreach ($snapshotCollection->find() as $document) {
+            $collection->insertOne($document);
+        }
     }
 }
