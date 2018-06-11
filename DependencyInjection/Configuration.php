@@ -3,6 +3,7 @@ namespace Makasim\Yadm\Bundle\DependencyInjection;
 
 use Makasim\Yadm\Hydrator;
 use Makasim\Yadm\Storage;
+use Makasim\Yadm\StorageMeta;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
@@ -28,6 +29,8 @@ class Configuration implements ConfigurationInterface
                         ->end()
                         ->scalarNode('class')->isRequired()->cannotBeEmpty()->end()
                         ->scalarNode('storage_class')->defaultValue(Storage::class)->cannotBeEmpty()->end()
+                        ->scalarNode('storage_meta')->defaultValue(false)->end()
+                        ->scalarNode('storage_meta_class')->defaultValue(StorageMeta::class)->cannotBeEmpty()->end()
                         ->booleanNode('storage_autowire')->defaultFalse()->end()
                         ->scalarNode('collection')->isRequired()->cannotBeEmpty()->end()
                         ->scalarNode('database')->defaultValue(null)->end()

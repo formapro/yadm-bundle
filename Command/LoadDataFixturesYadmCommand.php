@@ -42,7 +42,7 @@ class LoadDataFixturesYadmCommand extends Command
     protected function configure()
     {
         $this
-            ->setName('yadm:fixtures:load')
+            ->setName(static::$defaultName)
             ->setDescription('Load data fixtures to your database.')
             ->addOption('fixtures', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'The directory to load data fixtures from.')
             ->addOption('append', null, InputOption::VALUE_NONE, 'Append the data fixtures instead of deleting all data from the database first.')

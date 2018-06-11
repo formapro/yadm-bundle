@@ -3,6 +3,7 @@ namespace Makasim\Yadm\Bundle\DependencyInjection;
 
 use Makasim\Yadm\Bundle\Command\LoadDataFixturesYadmCommand;
 use Makasim\Yadm\Bundle\Command\MakeCollectionsSnapshotsCommand;
+use Makasim\Yadm\Bundle\Command\SchemaUpdateCommand;
 use Makasim\Yadm\ChangesCollector;
 use Makasim\Yadm\CollectionFactory;
 use Makasim\Yadm\ConvertValues;
@@ -75,12 +76,19 @@ class YadmExtension extends Extension
                 $container->register($hydratorId, $hydratorClass)->addArgument($modelConfig['class']);
             }
 
+            if (false == $storageMetaId = $modelConfig['storage_meta']) {
+                $storageMetaId = sprintf('yadm.%s.storage_meta', $name);
+
+                $container->register($storageMetaId, $modelConfig['storage_meta_class']);
+            }
+
             $container->register(sprintf('yadm.%s.storage', $name), $modelConfig['storage_class'])
                 ->addArgument(new Reference(sprintf('yadm.%s.collection', $name)))
                 ->addArgument(new Reference($hydratorId))
                 ->addArgument(new Reference('yadm.changes_collector'))
                 ->addArgument(null)
                 ->addArgument(new Reference(sprintf('yadm.%s.convert_values', $name)))
+                ->addArgument(new Reference($storageMetaId))
             ;
 
             if ($modelConfig['storage_autowire']) {
@@ -131,6 +139,13 @@ class YadmExtension extends Extension
         ;
 
         $container->register(MakeCollectionsSnapshotsCommand::class)
+            ->addArgument(null)
+            ->addArgument(new Reference('yadm'))
+            ->addArgument(new Reference('yadm.client'))
+            ->addTag('console.command')
+        ;
+
+        $container->register(SchemaUpdateCommand::class)
             ->addArgument(null)
             ->addArgument(new Reference('yadm'))
             ->addArgument(new Reference('yadm.client'))

@@ -37,7 +37,7 @@ class MakeCollectionsSnapshotsCommand extends Command
     protected function configure()
     {
         $this
-            ->setName('yadm:make-collections-snapshots')
+            ->setName(static::$defaultName)
             ->setDescription('Makes snapshots of mongodb collections')
         ;
     }
