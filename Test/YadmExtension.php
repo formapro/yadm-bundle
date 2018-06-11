@@ -3,29 +3,30 @@ namespace Makasim\Yadm\Bundle\Test;
 
 use Makasim\Yadm\Bundle\Snapshotter;
 use Makasim\Yadm\Registry;
+use Makasim\Yadm\Storage;
 use MongoDB\Client;
 use Symfony\Component\HttpKernel\Kernel;
 
 trait YadmExtension
 {
-    protected function restoreSnapshots()
+    protected function truncateStorages()
+    {
+        foreach ($this->getYadmRegistry()->getUniqueStorages() as $storage) {
+            $storage->getCollection()->drop();
+        }
+    }
+
+    protected function restoreStorages()
+    {
+        foreach ($this->getYadmRegistry()->getUniqueStorages() as $storage) {
+            $this->restoreStorage($storage);
+        }
+    }
+
+    protected function restoreStorage(Storage $storage)
     {
         $snapshotter = new Snapshotter($this->getMongodbClient());
-
-        $processedCollections = [];
-        foreach ($this->getYadmRegistry()->getStorages() as $name => $storage) {
-            $collection = $storage->getCollection();
-
-            $collection->getCollectionName();
-
-            if (isset($processedCollections[$collection->getCollectionName()])) {
-                continue;
-            }
-
-            $snapshotter->restore($collection);
-
-            $processedCollections[$collection->getCollectionName()] = true;
-        }
+        $snapshotter->restore($storage);
     }
 
     protected function getYadmRegistry(): Registry

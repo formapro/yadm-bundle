@@ -1,8 +1,8 @@
 <?php
 namespace Makasim\Yadm\Bundle;
 
+use Makasim\Yadm\Storage;
 use MongoDB\Client;
-use MongoDB\Collection;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
@@ -21,17 +21,17 @@ class Snapshotter
         $this->client = $client;
     }
 
-    /**
-     * @param Collection $collection
-     * @param LoggerInterface|null $logger
-     */
-    public function make(Collection $collection, LoggerInterface $logger = null)
+    public function make(Storage $storage, LoggerInterface $logger = null)
     {
         $logger  = $logger ?: new NullLogger();
+
+        $collection = $storage->getCollection();
 
         $collectionName = $collection->getCollectionName();
         $dbName = $collection->getDatabaseName();
         $snapshotDbName = $dbName.'_snapshot';
+
+        $this->client->selectCollection($snapshotDbName, $collectionName)->drop();
 
         $logger->debug(sprintf(
             'Copy documents from <info>%s.%s</info> to <info>%s.%s</info>',
@@ -42,23 +42,27 @@ class Snapshotter
         ));
 
         $snapshotCollection = $this->client->selectCollection($snapshotDbName, $collectionName);
-        $snapshotCollection->drop();
-        foreach ($collection->find() as $document) {
-            $snapshotCollection->insertOne($document);
+        if ($documents = $collection->find()->toArray()) {
+            $snapshotCollection->insertMany($documents);
         }
     }
 
-    /**
-     * @param Collection $collection
-     * @param LoggerInterface|null $logger
-     */
-    public function restore(Collection $collection, LoggerInterface $logger = null)
+    public function restore(Storage $storage, LoggerInterface $logger = null)
     {
         $logger  = $logger ?: new NullLogger();
+
+        $collection = $storage->getCollection();
 
         $collectionName = $collection->getCollectionName();
         $dbName = $collection->getDatabaseName();
         $snapshotDbName = $dbName.'_snapshot';
+
+        $collection->drop();
+
+        $this->client->selectDatabase($dbName)->createCollection($collectionName, $storage->getMeta()->getCreateCollectionOptions());
+        foreach ($storage->getMeta()->getIndexes() as $index) {
+            $collection->createIndex($index->getKey(), $index->getOptions());
+        }
 
         $logger->debug(sprintf(
             'Copy documents from <info>%s.%s</info> to <info>%s.%s</info>',
@@ -69,9 +73,8 @@ class Snapshotter
         ));
 
         $snapshotCollection = $this->client->selectCollection($snapshotDbName, $collectionName);
-        $collection->drop();
-        foreach ($snapshotCollection->find() as $document) {
-            $collection->insertOne($document);
+        if ($documents = $snapshotCollection->find()->toArray()) {
+            $collection->insertMany($documents);
         }
     }
 }

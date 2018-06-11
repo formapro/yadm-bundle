@@ -49,26 +49,13 @@ class MakeCollectionsSnapshotsCommand extends Command
     {
         $logger = new ConsoleLogger($output);
 
-        $logger->debug('Make snapshots of mongodb collections');
+        $logger->info('Make collection\s snapshots');
 
         $snapshotter = new Snapshotter($this->client);
-        $processedCollections = [];
-        foreach ($this->yadm->getStorages() as $name => $storage) {
-            /** @var Storage $storage */
-
-            $collection = $storage->getCollection();
-
-            $collection->getCollectionName();
-
-            if (isset($processedCollections[$collection->getCollectionName()])) {
-                continue;
-            }
-
-            $snapshotter->make($collection, $logger);
-
-            $processedCollections[$collection->getCollectionName()] = true;
+        foreach ($this->yadm->getUniqueStorages() as $storage) {
+            $snapshotter->make($storage, $logger);
         }
 
-        $logger->debug('Done');
+        $logger->info('Done');
     }
 }
