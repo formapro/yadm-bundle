@@ -4,7 +4,7 @@
   "license": "MIT",
   "require": {
     "php": ">=7.0",
-    "makasim/yadm": "^0.4"
+    "makasim/yadm": "^0.5"
   },
   "suggest": {
     "doctrine/data-fixtures": "^1.2  If you want to use fixrue load command"
@@ -17,7 +17,7 @@
   },
   "extra": {
     "branch-alias": {
-      "dev-master": "0.4.x-dev"
+      "dev-master": "0.5.x-dev"
     }
   }
 }
