@@ -47,8 +47,8 @@ class SchemaUpdateCommand extends Command
             ->setName(static::$defaultName)
             ->setDescription('Update database schema.')
             ->addOption('drop', null, InputOption::VALUE_NONE, 'Setup command loads fixtures if option set.')
-            ->addOption('no-create-collections', null, InputOption::VALUE_NONE, 'Skip create collections steps.')
-            ->addOption('ignore-duplicate-key-exception', null, InputOption::VALUE_NONE, 'Ingores duplicate keys exception.')
+            ->addOption('ignore-collection-exist-exception', null, InputOption::VALUE_NONE, 'Ignores already existing collections.')
+            ->addOption('ignore-duplicate-key-exception', null, InputOption::VALUE_NONE, 'Ignores duplicate keys exception.')
         ;
     }
 
@@ -67,28 +67,41 @@ class SchemaUpdateCommand extends Command
             $this->dropDatabase($output);
         }
 
-        if (false == $input->getOption('no-create-collections')) {
-            $this->setupCreateCollections($output);
-        }
-
+        $this->setupCreateCollections($output, $input->getOption('ignore-collection-exist-exception'));
         $this->setupLockIndexes($output);
         $this->setupModelIndexes($output, $input->getOption('ignore-duplicate-key-exception'));
     }
 
-    private function setupCreateCollections(OutputInterface $output)
+    private function setupCreateCollections(OutputInterface $output, bool $ignoreCollectionExistException)
     {
         $output->writeln('Create collections', OutputInterface::VERBOSITY_NORMAL);
 
         foreach ($this->yadm->getUniqueStorages() as $storage) {
             $meta = $storage->getMeta();
-            $this->database->createCollection($storage->getCollection()->getCollectionName(), $meta->getCreateCollectionOptions());
+            try {
+                $this->database->createCollection($storage->getCollection()->getCollectionName(), $meta->getCreateCollectionOptions());
 
-            $output->writeln("\t> ".$storage->getCollection()->getCollectionName(), OutputInterface::VERBOSITY_DEBUG);
+                $output->writeln("\t> " . $storage->getCollection()->getCollectionName(), OutputInterface::VERBOSITY_DEBUG);
+            } catch (CommandException $e) {
+                if (false == $ignoreCollectionExistException) {
+                    throw $e;
+                }
+
+                $output->writeln('<error>EXCEPTION</error> - '.$e->getMessage());
+            }
 
             if ($lock = $storage->getPessimisticLock()) {
-                $this->database->createCollection($lock->getCollection()->getCollectionName());
+                try {
+                    $this->database->createCollection($lock->getCollection()->getCollectionName());
 
-                $output->writeln("\t> ".$lock->getCollection()->getCollectionName(), OutputInterface::VERBOSITY_DEBUG);
+                    $output->writeln("\t> ".$lock->getCollection()->getCollectionName(), OutputInterface::VERBOSITY_DEBUG);
+                } catch (CommandException $e) {
+                    if (false == $ignoreCollectionExistException) {
+                        throw $e;
+                    }
+
+                    $output->writeln('<error>EXCEPTION</error> - '.$e->getMessage());
+                }
             }
         }
     }
