@@ -115,14 +115,16 @@ class SchemaUpdateCommand extends Command
                 foreach ($indexes as $index) {
                     try {
                         $collection->createIndex($index->getKey(), $index->getOptions());
+
+                        $output->writeln("\t> ".$collection->getCollectionName(), OutputInterface::VERBOSITY_DEBUG);
                     } catch (CommandException $e) {
-                        if ($ingoreDuplicateKeyException) {
-                            $output->writeln('EXCEPTION - '.$e->getMessage());
+                        if (false == $ingoreDuplicateKeyException) {
+                            throw $e;
                         }
+
+                        $output->writeln('<error>EXCEPTION</error> - '.$e->getMessage());
                     }
                 }
-
-                $output->writeln("\t> ".$collection->getCollectionName(), OutputInterface::VERBOSITY_DEBUG);
             }
         }
     }
