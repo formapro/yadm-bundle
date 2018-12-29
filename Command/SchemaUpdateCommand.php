@@ -5,6 +5,7 @@ use Makasim\Yadm\Registry;
 use Makasim\Yadm\Storage;
 use MongoDB\Client;
 use MongoDB\Database;
+use MongoDB\Driver\Exception\CommandException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -46,6 +47,8 @@ class SchemaUpdateCommand extends Command
             ->setName(static::$defaultName)
             ->setDescription('Update database schema.')
             ->addOption('drop', null, InputOption::VALUE_NONE, 'Setup command loads fixtures if option set.')
+            ->addOption('no-create-collections', null, InputOption::VALUE_NONE, 'Skip create collections steps.')
+            ->addOption('ignore-duplicate-key-exception', null, InputOption::VALUE_NONE, 'Ingores duplicate keys exception.')
         ;
     }
 
@@ -64,9 +67,12 @@ class SchemaUpdateCommand extends Command
             $this->dropDatabase($output);
         }
 
-        $this->setupCreateCollections($output);
+        if (false == $input->getOption('no-create-collections')) {
+            $this->setupCreateCollections($output);
+        }
+
         $this->setupLockIndexes($output);
-        $this->setupModelIndexes($output);
+        $this->setupModelIndexes($output, $input->getOption('ignore-duplicate-key-exception'));
     }
 
     private function setupCreateCollections(OutputInterface $output)
@@ -99,7 +105,7 @@ class SchemaUpdateCommand extends Command
         }
     }
 
-    private function setupModelIndexes(OutputInterface $output)
+    private function setupModelIndexes(OutputInterface $output, bool $ingoreDuplicateKeyException)
     {
         $output->writeln('Creating indexes');
 
@@ -107,7 +113,13 @@ class SchemaUpdateCommand extends Command
             $collection = $storage->getCollection();
             if ($indexes = $storage->getMeta()->getIndexes()) {
                 foreach ($indexes as $index) {
-                    $collection->createIndex($index->getKey(), $index->getOptions());
+                    try {
+                        $collection->createIndex($index->getKey(), $index->getOptions());
+                    } catch (CommandException $e) {
+                        if ($ingoreDuplicateKeyException) {
+                            $output->writeln('EXCEPTION - '.$e->getMessage());
+                        }
+                    }
                 }
 
                 $output->writeln("\t> ".$collection->getCollectionName(), OutputInterface::VERBOSITY_DEBUG);
