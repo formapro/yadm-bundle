@@ -1,7 +1,7 @@
 <?php
-namespace Makasim\Yadm\Bundle;
+namespace Formapro\Yadm\Bundle;
 
-use Makasim\Yadm\Storage;
+use Formapro\Yadm\Storage;
 use MongoDB\Client;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;

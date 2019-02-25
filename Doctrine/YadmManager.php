@@ -1,12 +1,12 @@
 <?php
-namespace Makasim\Yadm\Bundle\Doctrine;
+namespace Formapro\Yadm\Bundle\Doctrine;
 
 use Doctrine\Common\Persistence\ObjectManager;
-use function Makasim\Values\get_values;
-use function Makasim\Values\set_values;
-use function Makasim\Yadm\get_object_id;
-use Makasim\Yadm\Registry;
-use function Makasim\Yadm\set_object_id;
+use function Formapro\Values\get_values;
+use function Formapro\Values\set_values;
+use function Formapro\Yadm\get_object_id;
+use Formapro\Yadm\Registry;
+use function Formapro\Yadm\set_object_id;
 use MongoDB\BSON\ObjectID;
 
 class YadmManager implements ObjectManager

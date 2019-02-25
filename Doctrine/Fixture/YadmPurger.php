@@ -1,9 +1,9 @@
 <?php
-namespace Makasim\Yadm\Bundle\Doctrine\Fixture;
+namespace Formapro\Yadm\Bundle\Doctrine\Fixture;
 
 use Doctrine\Common\DataFixtures\Purger\PurgerInterface;
-use Makasim\Yadm\Registry;
-use Makasim\Yadm\Storage;
+use Formapro\Yadm\Registry;
+use Formapro\Yadm\Storage;
 
 class YadmPurger implements PurgerInterface
 {

@@ -1,8 +1,8 @@
 <?php
-namespace Makasim\Yadm\Bundle\Doctrine\Fixture;
+namespace Formapro\Yadm\Bundle\Doctrine\Fixture;
 
 use Doctrine\Common\DataFixtures\Executor\AbstractExecutor;
-use Makasim\Yadm\Bundle\Doctrine\YadmManager;
+use Formapro\Yadm\Bundle\Doctrine\YadmManager;
 
 class YadmExecutor extends AbstractExecutor
 {

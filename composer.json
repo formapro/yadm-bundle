@@ -1,16 +1,16 @@
 {
-  "name": "makasim/yadm-bundle",
+  "name": "formapro/yadm-bundle",
   "type": "symfony-bundle",
   "license": "MIT",
   "require": {
     "php": ">=7.0",
-    "makasim/yadm": "^0.5"
+    "formapro/yadm": "^0.5"
   },
   "suggest": {
     "doctrine/data-fixtures": "^1.2  If you want to use fixrue load command"
   },
   "autoload": {
-    "psr-4": { "Makasim\\Yadm\\Bundle\\": "" },
+    "psr-4": { "Formapro\\Yadm\\Bundle\\": "" },
     "exclude-from-classmap": [
       "/Tests/"
     ]

@@ -1,11 +1,11 @@
 <?php
-namespace Makasim\Yadm\Bundle\Command;
+namespace Formapro\Yadm\Bundle\Command;
 
 use App\Kernel;
-use Makasim\Yadm\Bundle\Doctrine\Fixture\YadmExecutor;
-use Makasim\Yadm\Bundle\Doctrine\Fixture\YadmPurger;
-use Makasim\Yadm\Bundle\Doctrine\YadmManager;
-use Makasim\Yadm\Registry;
+use Formapro\Yadm\Bundle\Doctrine\Fixture\YadmExecutor;
+use Formapro\Yadm\Bundle\Doctrine\Fixture\YadmPurger;
+use Formapro\Yadm\Bundle\Doctrine\YadmManager;
+use Formapro\Yadm\Registry;
 use Symfony\Bridge\Doctrine\DataFixtures\ContainerAwareLoader as DataFixturesLoader;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;

@@ -1,16 +1,16 @@
 <?php
-namespace Makasim\Yadm\Bundle\DependencyInjection;
+namespace Formapro\Yadm\Bundle\DependencyInjection;
 
-use Makasim\Yadm\Bundle\Command\LoadDataFixturesYadmCommand;
-use Makasim\Yadm\Bundle\Command\MakeCollectionsSnapshotsCommand;
-use Makasim\Yadm\Bundle\Command\SchemaUpdateCommand;
-use Makasim\Yadm\ChangesCollector;
-use Makasim\Yadm\CollectionFactory;
-use Makasim\Yadm\ConvertValues;
-use Makasim\Yadm\PessimisticLock;
-use Makasim\Yadm\Registry;
-use Makasim\Yadm\Type\UTCDatetimeType;
-use Makasim\Yadm\Type\UuidType;
+use Formapro\Yadm\Bundle\Command\LoadDataFixturesYadmCommand;
+use Formapro\Yadm\Bundle\Command\MakeCollectionsSnapshotsCommand;
+use Formapro\Yadm\Bundle\Command\SchemaUpdateCommand;
+use Formapro\Yadm\ChangesCollector;
+use Formapro\Yadm\CollectionFactory;
+use Formapro\Yadm\ConvertValues;
+use Formapro\Yadm\PessimisticLock;
+use Formapro\Yadm\Registry;
+use Formapro\Yadm\Type\UTCDatetimeType;
+use Formapro\Yadm\Type\UuidType;
 use MongoDB\Client;
 use MongoDB\Collection;
 use Symfony\Component\DependencyInjection\ContainerBuilder;

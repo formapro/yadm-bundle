@@ -1,8 +1,8 @@
 <?php
-namespace Makasim\Yadm\Bundle\Command;
+namespace Formapro\Yadm\Bundle\Command;
 
-use Makasim\Yadm\Registry;
-use Makasim\Yadm\Storage;
+use Formapro\Yadm\Registry;
+use Formapro\Yadm\Storage;
 use MongoDB\Client;
 use MongoDB\Database;
 use MongoDB\Driver\Exception\CommandException;
@@ -47,8 +47,8 @@ class SchemaUpdateCommand extends Command
             ->setName(static::$defaultName)
             ->setDescription('Update database schema.')
             ->addOption('drop', null, InputOption::VALUE_NONE, 'Setup command loads fixtures if option set.')
-            ->addOption('ignore-collection-exist-exception', null, InputOption::VALUE_NONE, 'Ignores already existing collections.')
-            ->addOption('ignore-duplicate-key-exception', null, InputOption::VALUE_NONE, 'Ignores duplicate keys exception.')
+            ->addOption('stop-on-collection-exist-exception', null, InputOption::VALUE_NONE, 'Interrupts execution if collection already exists.')
+            ->addOption('stop-on-duplicate-key-exception', null, InputOption::VALUE_NONE, 'Interrupts execution on duplicate keys exception.')
         ;
     }
 
@@ -67,12 +67,12 @@ class SchemaUpdateCommand extends Command
             $this->dropDatabase($output);
         }
 
-        $this->setupCreateCollections($output, $input->getOption('ignore-collection-exist-exception'));
+        $this->setupCreateCollections($output, $input->getOption('stop-on-collection-exist-exception'));
         $this->setupLockIndexes($output);
-        $this->setupModelIndexes($output, $input->getOption('ignore-duplicate-key-exception'));
+        $this->setupModelIndexes($output, $input->getOption('stop-on-duplicate-key-exception'));
     }
 
-    private function setupCreateCollections(OutputInterface $output, bool $ignoreCollectionExistException)
+    private function setupCreateCollections(OutputInterface $output, bool $stopOnCollectionExistException)
     {
         $output->writeln('Create collections', OutputInterface::VERBOSITY_NORMAL);
 
@@ -83,7 +83,7 @@ class SchemaUpdateCommand extends Command
 
                 $output->writeln("\t> " . $storage->getCollection()->getCollectionName(), OutputInterface::VERBOSITY_DEBUG);
             } catch (CommandException $e) {
-                if (false == $ignoreCollectionExistException) {
+                if ($stopOnCollectionExistException) {
                     throw $e;
                 }
 
@@ -96,7 +96,7 @@ class SchemaUpdateCommand extends Command
 
                     $output->writeln("\t> ".$lock->getCollection()->getCollectionName(), OutputInterface::VERBOSITY_DEBUG);
                 } catch (CommandException $e) {
-                    if (false == $ignoreCollectionExistException) {
+                    if ($stopOnCollectionExistException) {
                         throw $e;
                     }
 
@@ -118,7 +118,7 @@ class SchemaUpdateCommand extends Command
         }
     }
 
-    private function setupModelIndexes(OutputInterface $output, bool $ingoreDuplicateKeyException)
+    private function setupModelIndexes(OutputInterface $output, bool $stopOnDuplicateKeyException)
     {
         $output->writeln('Creating indexes');
 
@@ -131,7 +131,7 @@ class SchemaUpdateCommand extends Command
 
                         $output->writeln("\t> ".$collection->getCollectionName(), OutputInterface::VERBOSITY_DEBUG);
                     } catch (CommandException $e) {
-                        if (false == $ingoreDuplicateKeyException) {
+                        if ($stopOnDuplicateKeyException) {
                             throw $e;
                         }
 
