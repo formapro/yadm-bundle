@@ -1,9 +1,9 @@
 <?php
-namespace Makasim\Yadm\Bundle\Test;
+namespace Formapro\Yadm\Bundle\Test;
 
-use Makasim\Yadm\Bundle\Snapshotter;
-use Makasim\Yadm\Registry;
-use Makasim\Yadm\Storage;
+use Formapro\Yadm\Bundle\Snapshotter;
+use Formapro\Yadm\Registry;
+use Formapro\Yadm\Storage;
 use MongoDB\Client;
 use Symfony\Component\HttpKernel\Kernel;
 

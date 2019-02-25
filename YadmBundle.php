@@ -1,5 +1,5 @@
 <?php
-namespace Makasim\Yadm\Bundle;
+namespace Formapro\Yadm\Bundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 

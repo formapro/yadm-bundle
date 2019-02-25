@@ -1,8 +1,8 @@
 <?php
-namespace Makasim\Yadm\Bundle\Doctrine\Fixture;
+namespace Formapro\Yadm\Bundle\Doctrine\Fixture;
 
 use Doctrine\Common\Persistence\ObjectManager;
-use function Makasim\Yadm\get_object_id;
+use function Formapro\Yadm\get_object_id;
 
 class ReferenceRepository extends \Doctrine\Common\DataFixtures\ReferenceRepository
 {

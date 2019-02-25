@@ -1,8 +1,8 @@
 <?php
-namespace Makasim\Yadm\Bundle\Command;
+namespace Formapro\Yadm\Bundle\Command;
 
-use Makasim\Yadm\Registry;
-use Makasim\Yadm\Storage;
+use Formapro\Yadm\Registry;
+use Formapro\Yadm\Storage;
 use MongoDB\Client;
 use MongoDB\Database;
 use MongoDB\Driver\Exception\CommandException;

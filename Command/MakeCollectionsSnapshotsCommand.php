@@ -1,9 +1,9 @@
 <?php
-namespace Makasim\Yadm\Bundle\Command;
+namespace Formapro\Yadm\Bundle\Command;
 
-use Makasim\Yadm\Bundle\Snapshotter;
-use Makasim\Yadm\Registry;
-use Makasim\Yadm\Storage;
+use Formapro\Yadm\Bundle\Snapshotter;
+use Formapro\Yadm\Registry;
+use Formapro\Yadm\Storage;
 use MongoDB\Client;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;

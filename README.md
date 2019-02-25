@@ -5,7 +5,7 @@
 Install library
 
 ```bash
-$ composer require makasim/yadm-bundle "mikemccabe/json-patch-php:dev-master as 0.1.1"
+$ composer require formapro/yadm-bundle "mikemccabe/json-patch-php:dev-master as 0.1.1"
 ```
 
 Register the bundle
@@ -19,7 +19,7 @@ class AppKernel extends Kernel
     public function registerBundles()
     {
         $bundles = [
-            new \Makasim\Yadm\Bundle\YadmBundle(),
+            new \Formapro\Yadm\Bundle\YadmBundle(),
         ];
 
         return $bundles;

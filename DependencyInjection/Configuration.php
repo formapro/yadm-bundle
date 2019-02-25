@@ -1,9 +1,9 @@
 <?php
-namespace Makasim\Yadm\Bundle\DependencyInjection;
+namespace Formapro\Yadm\Bundle\DependencyInjection;
 
-use Makasim\Yadm\Hydrator;
-use Makasim\Yadm\Storage;
-use Makasim\Yadm\StorageMeta;
+use Formapro\Yadm\Hydrator;
+use Formapro\Yadm\Storage;
+use Formapro\Yadm\StorageMeta;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
