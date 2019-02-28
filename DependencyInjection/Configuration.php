@@ -2,6 +2,7 @@
 namespace Formapro\Yadm\Bundle\DependencyInjection;
 
 use Formapro\Yadm\Hydrator;
+use Formapro\Yadm\Migration\Symfony\MigrationsDIFactory;
 use Formapro\Yadm\Storage;
 use Formapro\Yadm\StorageMeta;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
@@ -41,6 +42,7 @@ class Configuration implements ConfigurationInterface
                     ->end()
                 ->end()
             ->end()
+            ->append(MigrationsDIFactory::getConfiguration())
         ;
 
         return $tb;
