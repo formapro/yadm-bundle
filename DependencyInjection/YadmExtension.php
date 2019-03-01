@@ -7,7 +7,6 @@ use Formapro\Yadm\Bundle\Command\SchemaUpdateCommand;
 use Formapro\Yadm\ChangesCollector;
 use Formapro\Yadm\CollectionFactory;
 use Formapro\Yadm\ConvertValues;
-use Formapro\Yadm\Migration\Context;
 use Formapro\Yadm\Migration\Symfony\MigrationsDIFactory;
 use Formapro\Yadm\PessimisticLock;
 use Formapro\Yadm\Registry;

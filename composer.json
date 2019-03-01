@@ -4,10 +4,11 @@
   "license": "MIT",
   "require": {
     "php": ">=7.0",
-    "formapro/yadm": "^0.5"
+    "formapro/yadm": "^0.5",
+    "formapro/yadm-migrations": "^0.5"
   },
   "suggest": {
-    "doctrine/data-fixtures": "^1.2  If you want to use fixrue load command"
+    "doctrine/data-fixtures": "^1.2  If you want to use fixture load command"
   },
   "autoload": {
     "psr-4": { "Formapro\\Yadm\\Bundle\\": "" },
