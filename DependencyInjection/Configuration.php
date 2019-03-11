@@ -38,7 +38,6 @@ class Configuration implements ConfigurationInterface
                         ->scalarNode('hydrator')->defaultValue(false)->end()
                         ->scalarNode('hydrator_class')->defaultValue(Hydrator::class)->cannotBeEmpty()->end()
                         ->booleanNode('pessimistic_lock')->defaultFalse()->end()
-                        ->scalarNode('repository')->end()
                     ->end()
                 ->end()
             ->end()

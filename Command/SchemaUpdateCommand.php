@@ -10,32 +10,24 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Psr\Container\ContainerInterface;
 
 class SchemaUpdateCommand extends Command
 {
     public static $defaultName = 'yadm:schema:update';
-    
-    /**
-     * @var Registry
-     */
-    private $yadm;
 
-    /**
-     * @var Client
-     */
-    private $mongodb;
+    private $container;
 
     /**
      * @var Database
      */
     private $database;
 
-    public function __construct(?string $name = null, Registry $yadm, Client $mongodb)
+    public function __construct(?string $name = null, ContainerInterface $cotainer)
     {
         parent::__construct($name);
-        
-        $this->yadm = $yadm;
-        $this->mongodb = $mongodb;
+
+        $this->container = $cotainer;
     }
 
     /**
@@ -55,10 +47,10 @@ class SchemaUpdateCommand extends Command
     protected function initialize(InputInterface $input, OutputInterface $output)
     {
         /** @var Storage $storage */
-        $storages = $this->yadm->getStorages();
+        $storages = $this->getRegistry()->getStorages();
         $storage = array_pop($storages);
 
-        $this->database = $this->mongodb->selectDatabase($storage->getCollection()->getDatabaseName());
+        $this->database = $this->getClient()->selectDatabase($storage->getCollection()->getDatabaseName());
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -76,7 +68,7 @@ class SchemaUpdateCommand extends Command
     {
         $output->writeln('Create collections', OutputInterface::VERBOSITY_NORMAL);
 
-        foreach ($this->yadm->getUniqueStorages() as $storage) {
+        foreach ($this->getRegistry()->getStorages() as $storage) {
             $meta = $storage->getMeta();
             try {
                 $this->database->createCollection($storage->getCollection()->getCollectionName(), $meta->getCreateCollectionOptions());
@@ -110,7 +102,7 @@ class SchemaUpdateCommand extends Command
     {
         $output->writeln('Creating lock indexes', OutputInterface::VERBOSITY_NORMAL);
 
-        foreach ($this->yadm->getUniqueStorages() as $storage) {
+        foreach ($this->getRegistry()->getStorages() as $storage) {
             if ($lock = $storage->getPessimisticLock()) {
                 $lock->createIndexes();
                 $output->writeln("\t> ".$lock->getCollection()->getCollectionName(), OutputInterface::VERBOSITY_DEBUG);
@@ -122,7 +114,7 @@ class SchemaUpdateCommand extends Command
     {
         $output->writeln('Creating indexes');
 
-        foreach ($this->yadm->getUniqueStorages() as $storage) {
+        foreach ($this->getRegistry()->getStorages() as $storage) {
             $collection = $storage->getCollection();
             if ($indexes = $storage->getMeta()->getIndexes()) {
                 foreach ($indexes as $index) {
@@ -148,5 +140,15 @@ class SchemaUpdateCommand extends Command
         $output->writeln('');
 
         $this->database->drop();
+    }
+
+    protected function getClient(): Client
+    {
+        return $this->container->get('yadm.client');
+    }
+
+    protected function getRegistry(): Registry
+    {
+        return $this->container->get('yadm');
     }
 }
