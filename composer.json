@@ -3,8 +3,8 @@
   "type": "symfony-bundle",
   "license": "MIT",
   "require": {
-    "php": ">=7.0",
-    "formapro/yadm": "^0.5",
+    "php": ">=7.1",
+    "formapro/yadm": "^0.5.2",
     "formapro/yadm-migrations": "^0.5"
   },
   "suggest": {
