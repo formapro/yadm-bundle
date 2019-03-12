@@ -5,6 +5,7 @@ use Formapro\Yadm\Bundle\Snapshotter;
 use Formapro\Yadm\Registry;
 use Formapro\Yadm\Storage;
 use MongoDB\Client;
+use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Logger\ConsoleLogger;
@@ -13,22 +14,14 @@ use Symfony\Component\Console\Output\OutputInterface;
 class MakeCollectionsSnapshotsCommand extends Command
 {
     public static $defaultName = 'yadm:make-collections-snapshots';
+    
+    private $container;
 
-    /**
-     * @var Registry
-     */
-    private $yadm;
-
-    /**
-     * @var Client
-     */
-    private $client;
-
-    public function __construct(?string $name = null, Registry $yadm, Client $client)
+    public function __construct(?string $name = null, ContainerInterface $cotainer)
     {
         parent::__construct($name);
-        $this->yadm = $yadm;
-        $this->client = $client;
+
+        $this->container = $cotainer;
     }
 
     /**
@@ -51,11 +44,21 @@ class MakeCollectionsSnapshotsCommand extends Command
 
         $logger->info('Make collection\s snapshots');
 
-        $snapshotter = new Snapshotter($this->client);
-        foreach ($this->yadm->getUniqueStorages() as $storage) {
+        $snapshotter = new Snapshotter($this->getClient());
+        foreach ($this->getRegistry()->getStorages() as $storage) {
             $snapshotter->make($storage, $logger);
         }
 
         $logger->info('Done');
+    }
+    
+    protected function getClient(): Client
+    {
+        return $this->container->get('yadm.client');
+    }
+    
+    protected function getRegistry(): Registry
+    {
+        return $this->container->get('yadm');
     }
 }

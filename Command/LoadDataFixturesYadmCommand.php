@@ -12,28 +12,22 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Psr\Container\ContainerInterface;
 
 class LoadDataFixturesYadmCommand extends Command
 {
     public static $defaultName = 'yadm:fixtures:load';
     
     /**
-     * @var Registry
-     */
-    private $yadm;
-
-    /**
      * @var ContainerInterface 
      */
     private $container;
 
-    public function __construct(?string $name = null, Registry $yadm, ContainerInterface $container)
+    public function __construct(?string $name = null, ContainerInterface $cotainer)
     {
         parent::__construct($name);
-        
-        $this->yadm = $yadm;
-        $this->container = $container;
+
+        $this->container = $cotainer;
     }
 
     /**
@@ -55,7 +49,7 @@ class LoadDataFixturesYadmCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $manager = new YadmManager($this->yadm);
+        $manager = new YadmManager($this->getRegistry());
 
         if ($input->isInteractive() && !$input->getOption('append')) {
             if (!$this->askConfirmation($input, $output, '<question>Careful, database will be purged. Do you want to continue y/N ?</question>', false)) {
@@ -92,7 +86,7 @@ class LoadDataFixturesYadmCommand extends Command
             );
         }
 
-        $purger = new YadmPurger($this->yadm);
+        $purger = new YadmPurger($this->getRegistry());
         $executor = new YadmExecutor($manager, $purger);
         $executor->setLogger(function ($message) use ($output) {
             $output->writeln(sprintf('  <comment>></comment> <info>%s</info>', $message));
@@ -134,5 +128,10 @@ class LoadDataFixturesYadmCommand extends Command
         $question = new ConfirmationQuestion($question, $default);
 
         return $questionHelper->ask($input, $output, $question);
+    }
+
+    protected function getRegistry(): Registry
+    {
+        return $this->container->get('yadm');
     }
 }

@@ -12,10 +12,12 @@ use Formapro\Yadm\PessimisticLock;
 use Formapro\Yadm\Registry;
 use Formapro\Yadm\Type\UTCDatetimeType;
 use Formapro\Yadm\Type\UuidType;
+use Formapro\Yadm\LocatorRegistry;
 use MongoDB\Client;
 use MongoDB\Collection;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Component\DependencyInjection\ServiceLocator;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 
 class YadmExtension extends Extension
@@ -42,7 +44,6 @@ class YadmExtension extends Extension
         $container->register('yadm.changes_collector', ChangesCollector::class);
 
         $storages = [];
-        $repositories = [];
         foreach ($config['models'] as $name => $modelConfig) {
             $container->register(sprintf('yadm.%s.collection', $name), Collection::class)
                 ->setFactory([new Reference('yadm.collection_factory'), 'create'])
@@ -114,17 +115,17 @@ class YadmExtension extends Extension
                 ;
             }
 
-            if (isset($modelConfig['repository'])) {
-                $repositories[$modelConfig['class']] = new Reference($modelConfig['repository']);
-            }
-
             $storages[$modelConfig['class']] = new Reference(sprintf('yadm.%s.storage', $name));
             $storages[$name] = new Reference(sprintf('yadm.%s.storage', $name));
         }
 
-        $container->register('yadm', Registry::class)
-            ->addArgument($storages)
-            ->addArgument($repositories)
+        $locator = $container->register('yadm.storage.locator', ServiceLocator::class)
+            ->setArgument(0, $storages)
+            ->addTag('container.service_locator')
+        ;
+
+        $container->register('yadm', LocatorRegistry::class)
+            ->setArgument(0, $locator)
         ;
 
         $container->addAliases([
@@ -134,22 +135,19 @@ class YadmExtension extends Extension
 
         $container->register(LoadDataFixturesYadmCommand::class)
             ->addArgument(null)
-            ->addArgument(new Reference('yadm'))
             ->addArgument(new Reference('service_container'))
             ->addTag('console.command')
         ;
 
         $container->register(MakeCollectionsSnapshotsCommand::class)
             ->addArgument(null)
-            ->addArgument(new Reference('yadm'))
-            ->addArgument(new Reference('yadm.client'))
+            ->addArgument(new Reference('service_container'))
             ->addTag('console.command')
         ;
 
         $container->register(SchemaUpdateCommand::class)
             ->addArgument(null)
-            ->addArgument(new Reference('yadm'))
-            ->addArgument(new Reference('yadm.client'))
+            ->addArgument(new Reference('service_container'))
             ->addTag('console.command')
         ;
 
