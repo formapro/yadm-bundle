@@ -3,6 +3,7 @@ namespace Formapro\Yadm\Bundle\Command;
 
 use Formapro\Yadm\Registry;
 use Formapro\Yadm\Storage;
+use Formapro\Yadm\ClientProvider;
 use MongoDB\Client;
 use MongoDB\Database;
 use MongoDB\Driver\Exception\CommandException;
@@ -16,18 +17,21 @@ class SchemaUpdateCommand extends Command
 {
     public static $defaultName = 'yadm:schema:update';
 
-    private $container;
+    private $registry;
+
+    private $clientProvider;
 
     /**
      * @var Database
      */
     private $database;
 
-    public function __construct(?string $name = null, ContainerInterface $cotainer)
+    public function __construct(?string $name = null, Registry $registry, ClientProvider $clientProvider)
     {
         parent::__construct($name);
 
-        $this->container = $cotainer;
+        $this->registry = $registry;
+        $this->clientProvider = $clientProvider;
     }
 
     /**
@@ -47,10 +51,10 @@ class SchemaUpdateCommand extends Command
     protected function initialize(InputInterface $input, OutputInterface $output)
     {
         /** @var Storage $storage */
-        $storages = $this->getRegistry()->getStorages();
+        $storages = $this->registry->getStorages();
         $storage = array_pop($storages);
 
-        $this->database = $this->getClient()->selectDatabase($storage->getCollection()->getDatabaseName());
+        $this->database = $this->clientProvider->getClient()->selectDatabase($storage->getCollection()->getDatabaseName());
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -68,7 +72,7 @@ class SchemaUpdateCommand extends Command
     {
         $output->writeln('Create collections', OutputInterface::VERBOSITY_NORMAL);
 
-        foreach ($this->getRegistry()->getStorages() as $storage) {
+        foreach ($this->registry->getStorages() as $storage) {
             $meta = $storage->getMeta();
             try {
                 $this->database->createCollection($storage->getCollection()->getCollectionName(), $meta->getCreateCollectionOptions());
@@ -102,7 +106,7 @@ class SchemaUpdateCommand extends Command
     {
         $output->writeln('Creating lock indexes', OutputInterface::VERBOSITY_NORMAL);
 
-        foreach ($this->getRegistry()->getStorages() as $storage) {
+        foreach ($this->registry->getStorages() as $storage) {
             if ($lock = $storage->getPessimisticLock()) {
                 $lock->createIndexes();
                 $output->writeln("\t> ".$lock->getCollection()->getCollectionName(), OutputInterface::VERBOSITY_DEBUG);
@@ -114,7 +118,7 @@ class SchemaUpdateCommand extends Command
     {
         $output->writeln('Creating indexes');
 
-        foreach ($this->getRegistry()->getStorages() as $storage) {
+        foreach ($this->registry->getStorages() as $storage) {
             $collection = $storage->getCollection();
             if ($indexes = $storage->getMeta()->getIndexes()) {
                 foreach ($indexes as $index) {
@@ -140,15 +144,5 @@ class SchemaUpdateCommand extends Command
         $output->writeln('');
 
         $this->database->drop();
-    }
-
-    protected function getClient(): Client
-    {
-        return $this->container->get('yadm.client');
-    }
-
-    protected function getRegistry(): Registry
-    {
-        return $this->container->get('yadm');
     }
 }

@@ -18,16 +18,13 @@ class LoadDataFixturesYadmCommand extends Command
 {
     public static $defaultName = 'yadm:fixtures:load';
     
-    /**
-     * @var ContainerInterface 
-     */
-    private $container;
+    private $registry;
 
-    public function __construct(?string $name = null, ContainerInterface $cotainer)
+    public function __construct(?string $name = null, Registry $registry)
     {
         parent::__construct($name);
 
-        $this->container = $cotainer;
+        $this->registry = $registry;
     }
 
     /**
@@ -49,7 +46,7 @@ class LoadDataFixturesYadmCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $manager = new YadmManager($this->getRegistry());
+        $manager = new YadmManager($this->registry);
 
         if ($input->isInteractive() && !$input->getOption('append')) {
             if (!$this->askConfirmation($input, $output, '<question>Careful, database will be purged. Do you want to continue y/N ?</question>', false)) {
@@ -86,7 +83,7 @@ class LoadDataFixturesYadmCommand extends Command
             );
         }
 
-        $purger = new YadmPurger($this->getRegistry());
+        $purger = new YadmPurger($this->registry);
         $executor = new YadmExecutor($manager, $purger);
         $executor->setLogger(function ($message) use ($output) {
             $output->writeln(sprintf('  <comment>></comment> <info>%s</info>', $message));
@@ -128,10 +125,5 @@ class LoadDataFixturesYadmCommand extends Command
         $question = new ConfirmationQuestion($question, $default);
 
         return $questionHelper->ask($input, $output, $question);
-    }
-
-    protected function getRegistry(): Registry
-    {
-        return $this->container->get('yadm');
     }
 }

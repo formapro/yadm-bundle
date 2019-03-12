@@ -5,6 +5,7 @@ use Formapro\Yadm\Bundle\Command\LoadDataFixturesYadmCommand;
 use Formapro\Yadm\Bundle\Command\MakeCollectionsSnapshotsCommand;
 use Formapro\Yadm\Bundle\Command\SchemaUpdateCommand;
 use Formapro\Yadm\ChangesCollector;
+use Formapro\Yadm\ClientProvider;
 use Formapro\Yadm\CollectionFactory;
 use Formapro\Yadm\ConvertValues;
 use Formapro\Yadm\Migration\Symfony\MigrationsDIFactory;
@@ -13,6 +14,7 @@ use Formapro\Yadm\Registry;
 use Formapro\Yadm\Type\UTCDatetimeType;
 use Formapro\Yadm\Type\UuidType;
 use Formapro\Yadm\LocatorRegistry;
+use Formapro\Yadm\LazyClient;
 use MongoDB\Client;
 use MongoDB\Collection;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -29,20 +31,24 @@ class YadmExtension extends Extension
     {
         $config = $this->processConfiguration(new Configuration(), $configs);
 
-        $container->register('yadm.client', Client::class)
+        $container->register('yadm.client_provider', ClientProvider::class)
             ->addArgument($config['mongo_uri'])
+        ;
+
+        $container->register('yadm.client', Client::class)
+            ->setFactory([new Reference('yadm.client_provider'), 'getClient'])
         ;
 
         $container->register('yadm.uuid_type', UuidType::class);
         $container->register('yadm.utc_datetime', UTCDatetimeType::class);
 
         $container->register('yadm.collection_factory', CollectionFactory::class)
-            ->addArgument(new Reference('yadm.client'))
+            ->addArgument(new Reference('yadm.client_provider'))
             ->addArgument($config['mongo_uri'])
         ;
 
         $container->register('yadm.changes_collector', ChangesCollector::class);
-
+        
         $storages = [];
         foreach ($config['models'] as $name => $modelConfig) {
             $container->register(sprintf('yadm.%s.collection', $name), Collection::class)
@@ -125,29 +131,33 @@ class YadmExtension extends Extension
         ;
 
         $container->register('yadm', LocatorRegistry::class)
-            ->setArgument(0, $locator)
+            ->setArgument(0, array_keys($storages))
+            ->setArgument(1, $locator)
         ;
 
         $container->addAliases([
             Registry::class => 'yadm',
             Client::class => 'yadm.client',
+            ClientProvider::class => 'yadm.client_provider',
         ]);
 
         $container->register(LoadDataFixturesYadmCommand::class)
             ->addArgument(null)
-            ->addArgument(new Reference('service_container'))
+            ->addArgument(new Reference('yadm'))
             ->addTag('console.command')
         ;
 
         $container->register(MakeCollectionsSnapshotsCommand::class)
             ->addArgument(null)
-            ->addArgument(new Reference('service_container'))
+            ->addArgument(new Reference('yadm'))
+            ->addArgument(new Reference('yadm.client_provider'))
             ->addTag('console.command')
         ;
 
         $container->register(SchemaUpdateCommand::class)
             ->addArgument(null)
-            ->addArgument(new Reference('service_container'))
+            ->addArgument(new Reference('yadm'))
+            ->addArgument(new Reference('yadm.client_provider'))
             ->addTag('console.command')
         ;
 
