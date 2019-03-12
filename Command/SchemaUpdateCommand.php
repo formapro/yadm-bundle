@@ -4,7 +4,9 @@ namespace Formapro\Yadm\Bundle\Command;
 use Formapro\Yadm\Registry;
 use Formapro\Yadm\Storage;
 use Formapro\Yadm\ClientProvider;
+use Formapro\Yadm\StorageMetaInterface;
 use MongoDB\Client;
+use MongoDB\Collection;
 use MongoDB\Database;
 use MongoDB\Driver\Exception\CommandException;
 use Symfony\Component\Console\Command\Command;
@@ -64,7 +66,6 @@ class SchemaUpdateCommand extends Command
         }
 
         $this->setupCreateCollections($output, $input->getOption('stop-on-collection-exist-exception'));
-        $this->setupLockIndexes($output);
         $this->setupModelIndexes($output, $input->getOption('stop-on-duplicate-key-exception'));
     }
 
@@ -74,42 +75,10 @@ class SchemaUpdateCommand extends Command
 
         foreach ($this->registry->getStorages() as $storage) {
             $meta = $storage->getMeta();
-            try {
-                $this->database->createCollection($storage->getCollection()->getCollectionName(), $meta->getCreateCollectionOptions());
-
-                $output->writeln("\t> " . $storage->getCollection()->getCollectionName(), OutputInterface::VERBOSITY_DEBUG);
-            } catch (CommandException $e) {
-                if ($stopOnCollectionExistException) {
-                    throw $e;
-                }
-
-                $output->writeln('<error>EXCEPTION</error> - '.$e->getMessage());
-            }
+            $this->createCollection($storage->getCollection(), $meta, $output, $stopOnCollectionExistException);
 
             if ($lock = $storage->getPessimisticLock()) {
-                try {
-                    $this->database->createCollection($lock->getCollection()->getCollectionName());
-
-                    $output->writeln("\t> ".$lock->getCollection()->getCollectionName(), OutputInterface::VERBOSITY_DEBUG);
-                } catch (CommandException $e) {
-                    if ($stopOnCollectionExistException) {
-                        throw $e;
-                    }
-
-                    $output->writeln('<error>EXCEPTION</error> - '.$e->getMessage());
-                }
-            }
-        }
-    }
-
-    private function setupLockIndexes(OutputInterface $output)
-    {
-        $output->writeln('Creating lock indexes', OutputInterface::VERBOSITY_NORMAL);
-
-        foreach ($this->registry->getStorages() as $storage) {
-            if ($lock = $storage->getPessimisticLock()) {
-                $lock->createIndexes();
-                $output->writeln("\t> ".$lock->getCollection()->getCollectionName(), OutputInterface::VERBOSITY_DEBUG);
+                $this->createCollection($lock->getCollection(), $lock, $output, $stopOnCollectionExistException);
             }
         }
     }
@@ -119,20 +88,43 @@ class SchemaUpdateCommand extends Command
         $output->writeln('Creating indexes');
 
         foreach ($this->registry->getStorages() as $storage) {
-            $collection = $storage->getCollection();
-            if ($indexes = $storage->getMeta()->getIndexes()) {
-                foreach ($indexes as $index) {
-                    try {
-                        $collection->createIndex($index->getKey(), $index->getOptions());
+            $this->createIndexes($storage->getCollection(), $storage->getMeta(), $output, $stopOnDuplicateKeyException);
 
-                        $output->writeln("\t> ".$collection->getCollectionName(), OutputInterface::VERBOSITY_DEBUG);
-                    } catch (CommandException $e) {
-                        if ($stopOnDuplicateKeyException) {
-                            throw $e;
-                        }
+            if ($lock = $storage->getPessimisticLock()) {
+                $this->createIndexes($lock->getCollection(), $lock, $output, $stopOnDuplicateKeyException);
+            }
+        }
+    }
 
-                        $output->writeln('<error>EXCEPTION</error> - '.$e->getMessage());
+    private function createCollection(Collection $collection, StorageMetaInterface $meta, OutputInterface $output, bool $stopOnCollectionExistException)
+    {
+        try {
+            $this->database->createCollection($collection->getCollectionName(), $meta->getCreateCollectionOptions());
+
+            $output->writeln("\t> " . $collection->getCollectionName(), OutputInterface::VERBOSITY_DEBUG);
+        } catch (CommandException $e) {
+            if ($stopOnCollectionExistException) {
+                throw $e;
+            }
+
+            $output->writeln('<error>EXCEPTION</error> - '.$e->getMessage());
+        }
+    }
+
+    private function createIndexes(Collection $collection, StorageMetaInterface $meta, OutputInterface $output, bool $stopOnDuplicateKeyException)
+    {
+        if ($indexes = $meta->getIndexes()) {
+            foreach ($indexes as $index) {
+                try {
+                    $name = $collection->createIndex($index->getKey(), $index->getOptions());
+
+                    $output->writeln("\t> ".$collection->getCollectionName().'.'.$name, OutputInterface::VERBOSITY_DEBUG);
+                } catch (CommandException $e) {
+                    if ($stopOnDuplicateKeyException) {
+                        throw $e;
                     }
+
+                    $output->writeln('<error>EXCEPTION</error> - '.$e->getMessage());
                 }
             }
         }
