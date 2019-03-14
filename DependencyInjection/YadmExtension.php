@@ -84,10 +84,13 @@ class YadmExtension extends Extension
                 $container->register($hydratorId, $hydratorClass)->addArgument($modelConfig['class']);
             }
 
+            $storageMetaId = null;
             if (false == $storageMetaId = $modelConfig['storage_meta']) {
-                $storageMetaId = sprintf('yadm.%s.storage_meta', $name);
+                if ($storageMetaId = $modelConfig['storage_meta_class']) {
+                    $storageMetaId = sprintf('yadm.%s.storage_meta', $name);
 
-                $container->register($storageMetaId, $modelConfig['storage_meta_class']);
+                    $container->register($storageMetaId, $modelConfig['storage_meta_class']);
+                }
             }
 
             $container->register(sprintf('yadm.%s.storage', $name), $modelConfig['storage_class'])
@@ -96,7 +99,7 @@ class YadmExtension extends Extension
                 ->addArgument(new Reference('yadm.changes_collector'))
                 ->addArgument(null)
                 ->addArgument(new Reference(sprintf('yadm.%s.convert_values', $name)))
-                ->addArgument(new Reference($storageMetaId))
+                ->addArgument($storageMetaId ? new Reference($storageMetaId) : null)
             ;
 
             if ($modelConfig['storage_autowire']) {

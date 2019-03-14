@@ -31,7 +31,7 @@ class Configuration implements ConfigurationInterface
                         ->scalarNode('class')->isRequired()->cannotBeEmpty()->end()
                         ->scalarNode('storage_class')->defaultValue(Storage::class)->cannotBeEmpty()->end()
                         ->scalarNode('storage_meta')->defaultValue(false)->end()
-                        ->scalarNode('storage_meta_class')->defaultValue(StorageMeta::class)->cannotBeEmpty()->end()
+                        ->scalarNode('storage_meta_class')->defaultValue(null)->end()
                         ->booleanNode('storage_autowire')->defaultFalse()->end()
                         ->scalarNode('collection')->isRequired()->cannotBeEmpty()->end()
                         ->scalarNode('database')->defaultValue(null)->end()
