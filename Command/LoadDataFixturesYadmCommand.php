@@ -1,4 +1,5 @@
 <?php
+
 namespace Formapro\Yadm\Bundle\Command;
 
 use App\Kernel;
@@ -12,7 +13,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
-use Psr\Container\ContainerInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class LoadDataFixturesYadmCommand extends Command
 {
@@ -20,11 +21,14 @@ class LoadDataFixturesYadmCommand extends Command
     
     private $registry;
 
-    public function __construct(?string $name = null, Registry $registry)
-    {
-        parent::__construct($name);
+    private $container;
 
+    public function __construct(Registry $registry, ContainerInterface $container)
+    {
         $this->registry = $registry;
+        $this->container = $container;
+
+        parent::__construct(self::$defaultName);
     }
 
     /**

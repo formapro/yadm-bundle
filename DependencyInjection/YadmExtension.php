@@ -14,7 +14,6 @@ use Formapro\Yadm\Registry;
 use Formapro\Yadm\Type\UTCDatetimeType;
 use Formapro\Yadm\Type\UuidType;
 use Formapro\Yadm\LocatorRegistry;
-use Formapro\Yadm\LazyClient;
 use MongoDB\Client;
 use MongoDB\Collection;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -145,22 +144,20 @@ class YadmExtension extends Extension
         ]);
 
         $container->register(LoadDataFixturesYadmCommand::class)
-            ->addArgument(null)
-            ->addArgument(new Reference('yadm'))
+            ->setArgument(0, new Reference('yadm'))
+            ->setArgument(1, new Reference('service_container'))
             ->addTag('console.command')
         ;
 
         $container->register(MakeCollectionsSnapshotsCommand::class)
-            ->addArgument(null)
-            ->addArgument(new Reference('yadm'))
-            ->addArgument(new Reference('yadm.client_provider'))
+            ->setArgument(0, new Reference('yadm'))
+            ->setArgument(1, new Reference('yadm.client_provider'))
             ->addTag('console.command')
         ;
 
         $container->register(SchemaUpdateCommand::class)
-            ->addArgument(null)
-            ->addArgument(new Reference('yadm'))
-            ->addArgument(new Reference('yadm.client_provider'))
+            ->setArgument(0, new Reference('yadm'))
+            ->setArgument(1, new Reference('yadm.client_provider'))
             ->addTag('console.command')
         ;
 

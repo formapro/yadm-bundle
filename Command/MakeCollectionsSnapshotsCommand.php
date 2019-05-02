@@ -20,12 +20,12 @@ class MakeCollectionsSnapshotsCommand extends Command
     
     private $clientProvider;
 
-    public function __construct(?string $name = null, Registry $registry, ClientProvider $clientProvider)
+    public function __construct(Registry $registry, ClientProvider $clientProvider)
     {
-        parent::__construct($name);
-
         $this->registry = $registry;
         $this->clientProvider = $clientProvider;
+
+        parent::__construct(self::$defaultName);
     }
 
     /**
