@@ -47,6 +47,28 @@ class Snapshotter
         }
     }
 
+    public function delete(Storage $storage, LoggerInterface $logger = null): void
+    {
+        $logger = $logger ?: new NullLogger();
+
+        $collection = $storage->getCollection();
+
+        $collectionName = $collection->getCollectionName();
+        $dbName = $collection->getDatabaseName();
+
+        $collectionOptions = $storage->getMeta()->getCreateCollectionOptions();
+        if (array_key_exists('capped', $collectionOptions) && $collectionOptions['capped']) {
+            $collection->drop();
+
+            $this->client->selectDatabase($dbName)->createCollection($collectionName, $storage->getMeta()->getCreateCollectionOptions());
+            foreach ($storage->getMeta()->getIndexes() as $index) {
+                $collection->createIndex($index->getKey(), $index->getOptions());
+            }
+        } else {
+            $collection->deleteMany([]);
+        }
+    }
+
     public function restore(Storage $storage, LoggerInterface $logger = null)
     {
         $logger  = $logger ?: new NullLogger();
@@ -57,12 +79,7 @@ class Snapshotter
         $dbName = $collection->getDatabaseName();
         $snapshotDbName = $dbName.'_snapshot';
 
-        $collection->drop();
-
-        $this->client->selectDatabase($dbName)->createCollection($collectionName, $storage->getMeta()->getCreateCollectionOptions());
-        foreach ($storage->getMeta()->getIndexes() as $index) {
-            $collection->createIndex($index->getKey(), $index->getOptions());
-        }
+        $this->delete($storage, $logger);
 
         $logger->debug(sprintf(
             'Copy documents from <info>%s.%s</info> to <info>%s.%s</info>',

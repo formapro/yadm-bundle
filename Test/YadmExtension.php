@@ -11,8 +11,9 @@ trait YadmExtension
 {
     protected function truncateStorages()
     {
+        $snapshotter = new Snapshotter($this->getMongodbClient());
         foreach ($this->getYadmRegistry()->getUniqueStorages() as $storage) {
-            $storage->getCollection()->drop();
+            $snapshotter->delete($storage);
         }
     }
 
