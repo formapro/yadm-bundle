@@ -12,14 +12,14 @@ trait YadmExtension
     protected function truncateStorages()
     {
         $snapshotter = new Snapshotter($this->getMongodbClient());
-        foreach ($this->getYadmRegistry()->getUniqueStorages() as $storage) {
+        foreach ($this->getYadmRegistry()->getStorages() as $storage) {
             $snapshotter->delete($storage);
         }
     }
 
     protected function restoreStorages()
     {
-        foreach ($this->getYadmRegistry()->getUniqueStorages() as $storage) {
+        foreach ($this->getYadmRegistry()->getStorages() as $storage) {
             $this->restoreStorage($storage);
         }
     }
