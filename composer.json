@@ -4,7 +4,7 @@
   "license": "MIT",
   "require": {
     "php": ">=7.1",
-    "formapro/yadm": "^0.5.3",
+    "formapro/yadm": "^0.5.5",
     "formapro/yadm-migrations": "^0.5"
   },
   "suggest": {

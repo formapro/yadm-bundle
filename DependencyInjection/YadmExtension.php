@@ -50,12 +50,6 @@ class YadmExtension extends Extension
         
         $storages = [];
         foreach ($config['models'] as $name => $modelConfig) {
-            $container->register(sprintf('yadm.%s.collection', $name), Collection::class)
-                ->setFactory([new Reference('yadm.collection_factory'), 'create'])
-                ->addArgument($modelConfig['collection'])
-                ->addArgument($modelConfig['database'])
-            ;
-
             $typesServices = [];
             foreach ($modelConfig['types'] as $key => $type) {
                 switch ($type) {
@@ -93,12 +87,17 @@ class YadmExtension extends Extension
             }
 
             $container->register(sprintf('yadm.%s.storage', $name), $modelConfig['storage_class'])
-                ->addArgument(new Reference(sprintf('yadm.%s.collection', $name)))
+                ->addArgument($name)
+                ->addArgument(new Reference('yadm.collection_factory'))
                 ->addArgument(new Reference($hydratorId))
                 ->addArgument(new Reference('yadm.changes_collector'))
                 ->addArgument(null)
                 ->addArgument(new Reference(sprintf('yadm.%s.convert_values', $name)))
                 ->addArgument($storageMetaId ? new Reference($storageMetaId) : null)
+            ;
+
+            $container->register(sprintf('yadm.%s.collection', $name), Collection::class)
+                ->setFactory([new Reference(sprintf('yadm.%s.storage', $name)), 'getCollection'])
             ;
 
             if ($modelConfig['storage_autowire']) {
@@ -119,7 +118,7 @@ class YadmExtension extends Extension
                 ;
 
                 $container->getDefinition(sprintf('yadm.%s.storage', $name))
-                    ->replaceArgument(3, new Reference(sprintf('yadm.%s.pessimistic_lock', $name)))
+                    ->replaceArgument(4, new Reference(sprintf('yadm.%s.pessimistic_lock', $name)))
                 ;
             }
 
