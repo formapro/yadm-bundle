@@ -5,7 +5,7 @@ use Formapro\Yadm\Bundle\Snapshotter;
 use Formapro\Yadm\Registry;
 use Formapro\Yadm\Storage;
 use MongoDB\Client;
-use Symfony\Component\HttpKernel\Kernel;
+use Symfony\Bundle\FrameworkBundle\Test\TestContainer;
 
 trait YadmExtension
 {
@@ -32,13 +32,13 @@ trait YadmExtension
 
     protected function getYadmRegistry(): Registry
     {
-        return $this->getKernel()->getContainer()->get('yadm');
+        return $this->getTestContainer()->get('yadm');
     }
 
     protected function getMongodbClient(): Client
     {
-        return $this->getKernel()->getContainer()->get('yadm.client');
+        return $this->getTestContainer()->get('yadm.client');
     }
 
-    abstract protected function getKernel(): Kernel;
+    abstract protected function getTestContainer(): TestContainer;
 }
