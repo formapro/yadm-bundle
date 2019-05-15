@@ -37,7 +37,7 @@ trait YadmExtension
 
     protected function getMongodbClient(): Client
     {
-        return $this->getTestContainer()->get('yadm.client');
+        return $this->getTestContainer()->get('yadm.client_provider')->getClient();
     }
 
     abstract protected function getTestContainer(): TestContainer;
